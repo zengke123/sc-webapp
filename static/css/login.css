@@ -1,0 +1,23 @@
+.main {
+  margin: 0 auto;
+  width:600px;
+  height: 450px;
+  overflow: hidden;
+  color: inherit;
+  background-color: #eee;
+  padding: 100px;
+  margin-top: 10%;
+}
+
+
+.form-container{
+    width: 420px;
+    margin: 0 auto;
+}
+
+.logo{
+  margin: 0 auto;
+  width:800px;
+}
+
+

@@ -1,0 +1,32 @@
+.icon_content_area {
+    padding: 0 15px;
+    background: #fff;
+}
+.icon_content_holder {
+    padding: 35px 0 52px 0;
+    overflow: hidden;
+}
+.center_content {
+    max-width: 1375px;
+    margin: 0 auto;
+    min-height: 64px;
+    padding-top: 11px;
+    position: relative;
+}
+.text-center {
+    text-align: center;
+}
+.icon_content_box {
+    overflow: hidden;
+}
+.icon_column {
+    width: 16.66%;
+    padding: 0 10px;
+}
+.icon_photo {
+    padding-bottom: 13px;
+}
+
+.pull-left {
+    float: left;
+}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}主页{% endblock %}
+{% block body %}
+
+<h3>话单查询</h3><br>
+<form class="form-inline">
+  <div class="form-group">
+    <label for="exampleInputName2">日期</label>
+    <input type="text" class="form-control" name="date" placeholder="YYYYMMDD">
+  </div>
+  <div class="form-group">
+    <label for="exampleInputEmail2">查询号码</label>
+    <input type="email" class="form-control" name="phonenumber" >
+  </div>
+  <button type="submit" class="btn btn-primary">确认</button>
+</form>
+
+{% endblock %}

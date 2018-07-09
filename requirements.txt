@@ -1,0 +1,13 @@
+pip install Flask>=0.10.1
+
+pip install Flask-Login==0.4.1
+
+pip install Flask-WTF==0.14.2
+
+pip install WTForms==2.2.1
+
+pip install flask-SQLAlchemy
+
+flask-script
+
+flask-migrate

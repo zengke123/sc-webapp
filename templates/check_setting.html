@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}自动例检配置{% endblock %}
+{% block body %}
+  <ul class="nav nav-tabs">
+  <li role="presentation"><a href="{{ url_for('check_add') }}">添加</a></li>
+  <li role="presentation"><a href="{{ url_for('check_del') }}">删除</a></li>
+</ul>
+{% endblock %}

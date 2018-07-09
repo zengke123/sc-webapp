@@ -1,0 +1,357 @@
+html {
+  font-size : 20px;
+}
+body{
+    background: url('/static/img/background.png');
+    background-size: 100% 65%;
+    background-color: #eee;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+}
+.container{
+    padding-top: 10%;
+}
+.header{
+    text-align: center;
+    color: white;
+    margin-bottom: 0.814rem;
+}
+.logo>img{
+    height: 1.11rem;
+}
+.title{
+    font-weight: 100;
+    font-size: 1.06rem;
+}
+.page-footer{
+    display:none;
+}
+#login-card{
+    background: #ffffff;
+    margin: 0 auto;
+    width: 12.444rem;
+    border-radius: 3px;
+    box-shadow: 0 0 1px #cbcbcb;
+    padding-bottom: 0.51852rem;
+}
+.divider-column{
+    display:none;
+}
+div.field{
+    padding-top: 0.5925rem;
+    padding-left: 1.111rem;
+}
+div.field input{
+    width: 8.53312rem;
+    height: 1.333rem;
+    font-size: 0.56296rem;
+    font-weight: 100;
+    color: #5a5a5a;
+    border: 0.05rem solid rgba(34, 36, 38, 0.15);
+    border-radius: 0.1rem;
+    padding-left: 2em;
+    padding-right: 1em;
+    vertical-align: top;
+    background-position-y: 0.35rem;
+    background-position-x: 0.2496rem;
+    background-repeat: no-repeat;
+    background-size: 0.7507rem;
+}
+div.field input[name=username]{
+    background-image: url('/wengine-auth/static/username.png');
+}
+div.field input[name=password]{
+    background-image: url('/wengine-auth/static/password.png');
+}
+div.field input.small{
+    width: 5.756325rem;
+    padding-left: 0.75em;
+}
+#send-sms{
+  height: 1.433rem;
+  width: 3rem;
+  font-size: 0.56296rem;
+  display: inline-block;
+  margin-left: 0.15rem;
+  background: #03cacc;
+  font-weight: 200;
+  color: #fff;
+  text-align: center;
+  line-height: 2.2;
+    vertical-align: top;
+}
+#send-sms.disabled{
+  background: #f0f0f0;
+  color: black;
+}
+.captcha{
+    background: rgba(255, 255, 255, 0.6);
+    height: 1.433rem;
+    width: 3rem;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 0.15rem;
+}
+.login{
+    color: #fff;
+    font-size: 0.5625rem;
+    background: #03cacc;
+    border: 0;
+    border-radius: 0.1rem;
+    height: 1.433rem;
+    width: 10.22062rem;
+    margin-top: 0.740740rem;
+    font-weight: 200;
+}
+.notice>h1{
+    display: none;
+}
+.notice>p{
+    font-weight: 200;
+    background-color: #f3f3f3;
+    font-size: 0.31851rem;
+    text-indent: 2em;
+    line-height: 1.8em;
+    color: #858585;
+    width: 10.2222rem;
+    margin: auto;
+    margin-top: 0.66667rem;
+}
+@media only screen and (min-width: 321px){
+  html {
+    font-size: 24px !important;
+  }
+}
+@media only screen and (min-width: 401px){
+  html {
+    font-size: 28px !important;
+  }
+}
+@media only screen and (min-width: 428px){
+  html {
+    font-size: 32.75px !important;
+  }
+}
+@media only screen and (min-width: 481px){
+  html {
+    font-size: 36px !important;
+  }
+}
+@media only screen and (min-width: 569px){
+  html {
+    font-size: 42px !important;
+  }
+}
+@media only screen and (min-width: 641px){
+  html {
+    font-size: 48px !important;
+  }
+}
+@media only screen and (min-width: 767px){
+  html {
+    font-size: 56px !important;
+  }
+}
+@media only screen and (min-width: 801px){
+    html {
+        font-size: 72px !important;
+    }
+    .header{
+        margin: auto;
+        width: 8.65rem;
+        margin-bottom: 0.415rem;
+        height: 0.6rem;
+        text-align: left;
+    }
+    .logo>img{
+        height: 100%;
+    }
+    .title{
+        font-size: 0.6rem;
+        float:right;
+        line-height: 1;
+        color: #fff;
+    }
+    #login-card{
+        width: 8.65rem;
+        padding-top: 0.3rem;
+        font-size:0;
+        border-radius: 0.05rem;
+        box-shadow: 0 0 0.1rem #cbcbcb;
+    }
+    #login-card>.column{
+        display: inline-block;
+        vertical-align: top;
+        padding-bottom: 0;
+    }
+    div.field{
+        padding-top: 0.3rem;
+        padding-left: 0.5rem;
+    }
+    div.field input{
+        width: 3.35rem;
+        height: 0.4rem;
+        font-size: 0.18rem;
+        font-weight: 400;
+        color: #5a5a5a;
+        border: 1px solid rgba(34, 36, 38, 0.15);
+        border-radius: 0.04rem;
+        padding-left: 0.5rem;
+        padding-right: 0.15rem;
+        vertical-align: top;
+        background-position-y: 0.04rem;
+        background-position-x: 0.1rem;
+        background-repeat: no-repeat;
+        background-size: 0.3rem;
+    }
+    div.field input.small{
+        width:2.05rem;
+        padding-left:0.15rem;
+    }
+    #send-sms{
+        height: 0.4rem;
+        width: 1.5rem;
+        display: inline-block;
+        margin-left: 0.15rem;
+        font-size: 0.22rem;
+        border-radius: 0.02rem;
+        border: 0;
+        background: #03cacc;
+        font-weight: 200;
+        color: #fff;
+        text-align: center;
+        line-height: 1.8;
+        cursor: pointer;
+    }
+    .sms_code{
+      padding-left: 0.15rem;
+    }
+    #send-sms.disabled{
+        background: #f0f0f0;
+        color: black;
+    }
+    .captcha{
+        background: rgba(255, 255, 255, 0.6);
+        height: 0.4rem;
+        width: 1.5rem;
+        display: inline-block;
+        vertical-align: top;
+        margin-left: 0.15rem;
+    }
+    .captcha-field{
+        margin-left: -1em;
+    }
+    .login-div{
+        margin-bottom:0.2rem;
+    }
+    .login{
+        font-size: 0.22rem;
+        border-radius: 0.02rem;
+        height: 0.5rem;
+        width: 4rem;
+        margin-top: 0.25rem;
+    }
+    .divider{
+        position: relative;
+        top: 0.29rem;
+        height:3rem;
+        width:1px;
+        margin-left:0.35rem;
+        background: #eee;
+    }
+    .notice{
+        width: 3.1rem;
+        margin-left: 0.35rem;
+    }
+    .notice>h1{
+        font-weight: 200;
+        font-size: 0.24rem;
+        color: #03cacc;
+        text-align: center;
+        margin-top: 0.35rem;
+        display:block;
+    }
+    .notice>p{
+        font-size: 0.16rem;
+        text-indent: 2em;
+        line-height: 1.8em;
+        color: #858585;
+        background-color: transparent;
+        width: 100%;
+        margin-top: 0;
+    }
+    .logo{
+        height:0.6rem;
+        display:inline-block;
+    }
+    .logo img{
+        vertical-align: top;
+    }
+    .error{
+        font-size: 0.18rem;
+        box-shadow: 0 0 0 1px #e0b4b4 inset, 0 0 0 0 transparent;
+        background-color: #fff6f6;
+        color: #9f3a38;
+        position: relative;
+        min-height: 1em;
+        padding: 1em 1.5em;
+        line-height: 1.4285em;
+        margin-left:0.5rem;
+        -webkit-transition: opacity .1s ease,color .1s ease,background .1s ease,box-shadow .1s ease;
+        transition: opacity .1s ease,color .1s ease,background .1s ease,box-shadow .1s ease;
+        border-radius: .28571429em;
+        box-shadow: 0 0 0 1px rgba(34,36,38,.22) inset, 0 0 0 0 transparent;
+        margin-top: 1em;
+        margin-bottom: -2em;
+    }
+    .page-footer{
+        display: block;
+        font-size: 0.14rem;
+        color: #858585;
+        text-align: center;
+        position: absolute;
+        bottom: 0.2rem;
+        width: 100%;
+    }
+}
+@media only screen and (min-width: 1281px){
+    html {
+        font-size: 80px !important;
+    }
+}
+@media only screen and (min-width: 1367px){
+    html {
+        font-size: 85.375px !important;
+    }
+}
+@media only screen and (min-width: 1441px){
+    html {
+        font-size: 90px !important;
+    }
+}
+@media only screen and (min-width: 1601px){
+    html {
+        font-size: 100px !important;
+    }
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color:    #c0c0c0;
+    font-weight: 200;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:    #c0c0c0;
+    font-weight: 200;
+    opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:    #c0c0c0;
+    font-weight: 200;
+    opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    font-weight: 200;
+    color:    #c0c0c0;
+}
+

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}主页{% endblock %}
+<link rel="stylesheet" href="/static/css/host.css">
+{% block body %}
+
+  <h3>自动例检</h3><br>
+  <div class="container">
+  <h4>{{ name }}</h4><br>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="icon_content_area">
+                <div class="icon_content_holder center_content text-center">
+                    <div class="icon_content_box">
+                        {% for host in hosts %}
+                        <div class="icon_column pull-left">
+                            <a href="#">
+                                <span>{{ host }}</span>
+                                <div class="icon_photo"><img src="/static/img/host2.png" alt="SCPAS"></div>
+                                <p><a href="#" class="btn btn-primary" role="button">例检</a></p>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+
+{% endblock %}
