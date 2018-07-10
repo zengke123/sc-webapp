@@ -1,8 +1,73 @@
 {% extends 'base.html' %}
 {% block title %}自动例检配置{% endblock %}
 {% block body %}
-  <ul class="nav nav-tabs">
-  <li role="presentation"><a href="{{ url_for('check_add') }}">添加</a></li>
-  <li role="presentation"><a href="{{ url_for('check_del') }}">删除</a></li>
-</ul>
+<h3>例检配置</h3><br>
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+{% for data in datas %}
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ data[2] }}" aria-expanded="true" aria-controls="collapse{{ data[2] }}">
+          {{ data[0] }}
+        </a>
+      </h4>
+    </div>
+    <div id="collapse{{ data[2] }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ data[2] }}">
+      <div class="panel-body">
+		<table class="table table-hover">
+			<tobody>
+			  <th>选择</th>
+			  <th>网元类型</th>
+			  <th>网元名称</th>
+			  <th>主机名称</th>
+			  <th>操作</th>
+			</tobody>
+			<tr>
+                {% for host in data[1] %}
+			<td><input type="checkbox"  value="{{ host.id }}"></td>
+            <td>{{ host.type }}</td>
+            <td>{{ host.cluster }}</td>
+            <td>{{ host.hostname }}</td>
+			<td><a class="btn btn-primary btn-xs" href="#" role="button">删除</a><a class="btn btn-default btn-xs" href="#" role="button">修改</a></td>
+			</tr>
+            {% endfor %}
+		</table>
+      </div>
+    </div>
+  </div>
+
+{% endfor %}
+
+</div>
+
+
+<div class="panel panel-default">
+  <!-- Default panel contents -->
+  <div class="panel-heading"> 新增</div>
+  <form class="form-inline" method="POST" action="{{ url_for('check_add') }}">
+        <div class="form-group">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputName2"> 网元类型</label>
+        <input type="text" class="form-control" name="type" placeholder="SCPAS">
+      </div>
+        <div class="form-group">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputName2"> 网元名称</label>
+        <input type="text" class="form-control" name="cluster" placeholder="SCPAS06">
+      </div>
+        <div class="form-group">
+      </div>
+       <div class="form-group">
+        <label for="exampleInputName2"> 主机名称</label>
+        <input type="text" class="form-control" name="hostname" placeholder="多台主机以‘|’分隔">
+      </div>
+      <div class="form-group">
+      </div>
+        <button type="submit" class="btn btn-primary">提交</button>
+   </form>
+
+</div>
 {% endblock %}
