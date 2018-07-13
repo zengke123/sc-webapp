@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}例检结果{% endblock %}
+{% block body %}
+<div class="jumbotron" id="pic">
+<form>
+  <p><strong>开始例检</strong></p>
+    <p><button type="submit" class="btn btn-primary" id="DA" onclick="false">确认</button>
+    <a class="btn btn-primary " href="{{ url_for('check') }}" role="button" id="CA">返回</a>
+</form>
+
+   <div class="container">
+        <div class="row">
+            <h5>运行进度：</h5>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped active" role="progressbar"
+                     aria-valuemin="0" aria-valuemax="100" style="width: 0%" id="bar">
+                    <span class="sr-only">100% Complete</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function () {
+        $("#DA").click(function () {
+            var DA = document.getElementById("DA");
+            var CA = document.getElementById("CA");
+            DA.setAttribute("disabled", "disabled");
+            CA.setAttribute("disabled", "disabled");
+            console.log(DA);
+            var seed = Math.random();
+            console.log(seed);
+            var hostname = "{{ result }}";//获取例检主机名称
+            var hosttype = "{{ type }}";//获取例检主机名称
+            $("#bar").attr("class", "progress-bar progress-bar-striped active");
+            $("#bar").width(0);
+                var sitv = setInterval(function () {
+                    $.ajax({
+                        url: "{{ url_for("autocheck_status")}}",
+                        data: {seed: seed},
+                        type: 'POST',
+                        async: true,
+                        success: function (percent) {
+                            var bar = document.getElementById("bar");
+                            bar.style = "width: " + percent + "%";
+                            $("#bar").width(percent + '%');
+                            console.log(percent)
+                        }
+                    })
+                }, 1000);
+                $.ajax({
+                    url: "{{ url_for("autocheck_run") }}",
+                    type: 'POST',
+                    async: true,
+                    data: {
+                        hostname: hostname,
+                        type: hosttype,
+                        seed: seed
+                    },
+                    success: function (data) {
+                        clearInterval(sitv);
+                        $("#bar").width(100 + "%");
+                        $('#bar').attr("class", "progress progress-bar-success");
+                        var para = document.createElement("h5");
+                        para.id = "result";
+                        var element = document.getElementById("pic");
+                        if(data==="success"){
+                            var node = document.createTextNode("例检完成");
+                            para.appendChild(node);
+                            element.appendChild(para);
+                            var a = document.createElement("a");
+                            var node1 = document.createTextNode("查看报告");
+                            a.appendChild(node1);
+                            a.setAttribute("href","/check");
+                            a.className="btn btn-primary btn-xs";
+                            var element1=document.getElementById("result");
+                            element1.appendChild(a)
+                        }
+                        else{
+                            var node2 = document.createTextNode("例检失败");
+                            para.appendChild(node2);
+                            element.appendChild(para);
+                        }
+                        CA.removeAttribute("disabled")
+                    }
+                })
+        })
+    });
+</script>
+
+{% endblock %}
