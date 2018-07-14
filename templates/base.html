@@ -6,6 +6,10 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static',filename='css/bootstrap.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static',filename='css/site.css') }}"/>
+    <script src="{{ url_for('static',filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
+    {% block head %}
+    {% endblock %}
 </head>
 <body>
 
@@ -58,10 +62,6 @@
     {% block body %}{% endblock %}
 </main>
 
-
-
-<script src="{{ url_for('static',filename='js/jquery.js') }}"></script>
-<script src="{{ url_for('static',filename='js/bootstrap.bundle.js') }}"></script>
 
 </body>
 </html>

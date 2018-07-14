@@ -1,12 +1,11 @@
-from exts import create_app, db, auto_check
+from exts import create_app, db, down_report, auto_check
 from models import User, Host
 from sqlalchemy import distinct
 from decorators import login_required
-from flask import request, session
-from flask import render_template, redirect, url_for
+from flask import request, session, jsonify
+from flask import render_template, redirect, url_for, send_from_directory
 app = create_app()
-
-
+status = {}
 # 默认的视图函数，只能采用get请求，需要使用post，需要说明
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -36,12 +35,14 @@ def logout():
     return redirect(url_for('login'))
 
 
+# 主页面
 @app.route('/')
 @login_required
 def index():
     return render_template('index.html')
 
 
+# 修改密码页面
 @app.route('/user', methods=['GET', 'POST'])
 def user():
     error = None
@@ -66,6 +67,7 @@ def user():
     return render_template('user.html', error=error)
 
 
+# 例检主页面
 @app.route('/check')
 @login_required
 def check():
@@ -80,6 +82,7 @@ def check():
     return render_template('check.html',data=data)
 
 
+# 例检单台主机页面
 @app.route('/check/info/')
 @login_required
 def check_host():
@@ -89,19 +92,55 @@ def check_host():
     return render_template('check_host.html', name=name, hosts=hosts)
 
 
-@app.route('/check/lj/')
+# 例检确认页面
+@app.route('/check/lj_check/')
 @login_required
 def lj():
     clustename = request.args.get('clustename', None)
     hostname = request.args.get('hostname', None)
     if clustename:
-        result = auto_check(lj_type='jq', name=clustename)
-        # return "调用集群自动例检接口，参数值{}".format(clustename)
+        result = clustename
+        host_type = "jq"
     else:
-        result = auto_check(lj_type='zj', name=hostname)
-        # return "调用主机自动例检接口，参数值{}".format(hostname)
-    return result
+        result = hostname
+        host_type = "zj"
+    return render_template('lj_result.html', result=result, type=host_type)
 
+
+# 自动例检主函数
+@app.route('/check/autocheck', methods=['GET', 'POST'])
+def autocheck_run():
+    hostname = request.form.get('hostname')
+    type = request.form.get('type')
+    seed = request.form.get("seed")
+    status[seed] = 20
+    flag = auto_check(type,hostname)
+    status[seed] =80
+    report_name = down_report()
+    status[seed] = 100
+    status.pop(seed)
+    return jsonify({'flag':flag,'filename':report_name})
+
+
+
+# 获取例检状态,实现前端进度条
+@app.route('/check/autocheck_status/<id>', methods=['GET', 'POST'])
+def autocheck_status(id):
+    seed = request.form.get("seed")
+    print(seed)
+    print(status.get(seed))
+    return str(status.get(seed))
+
+
+# 下载例检报告
+@app.route('/download/<file>')
+def download(file):
+    filepath = 'backup/' + str(file) + '/'
+    filename = str(file) + ".tar.gz"
+    return send_from_directory(filepath, filename, as_attachment=True)
+
+
+# 例检配置
 @app.route('/check/setting')
 @login_required
 def check_setting():
@@ -114,13 +153,15 @@ def check_setting():
     nums = len(types)
     for i, c_type in enumerate(types):
         cluste_temps = db.session.query(Host).filter(Host.type == c_type).all()
-        print(cluste_temps)
+        # print(cluste_temps)
         # clusters = [x[0] for x in cluste_temps]
         datas.append((c_type, cluste_temps,class_type[i]))
     return render_template('check_setting.html',datas=datas)
     # print(datas)
     # return "测试"
 
+
+# 添加例检项
 @app.route('/check/setting/add/', methods=['GET', 'POST'])
 @login_required
 def check_add():
@@ -131,16 +172,23 @@ def check_add():
     for host in hosts:
         add_host = Host(type=type, cluster=cluster, hostname=host)
         db.session.add(add_host)
-    db.session.commit()
-    # return render_template('check_add.html')
-    return "添加成功"
+    try:
+        db.session.commit()
+        return "success"
+    except:
+        return "fail"
 
+
+# 删除例检项,暂未实现
 @app.route('/check/setting/del')
 @login_required
 def check_del():
+    print(request.args)
+    print(request.form.get('del_host'))
     return render_template('check_del.html')
 
 
+# 话单查询页面,暂未实现
 @app.route('/query')
 @login_required
 def query():
@@ -152,10 +200,11 @@ def query():
 def my_context_processor():
     username = session.get('username')
     if username:
-        return {'username' : username}
+        return {'username': username}
     else:
-        return {'username' : None}
+        return {'username': None}
 
 
 if __name__ == '__main__':
-    app.run()
+    # 开启flask的多线程
+    app.run(host='0.0.0.0', threaded=True)

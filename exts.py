@@ -25,14 +25,39 @@ def auto_check(lj_type, name):
     child.sendline(cmd)
     child.expect('{}root >')
     result = child.before
-    # RETN=0000, DESC=OK
-    # RETN=0006
-    if 'RETN=0000' in result:
-        flag = True
+    if b'RETN=0000' in result:
+        flag = "success"
     else:
-        flag = False
-    # print(child.before)
+        flag = "fail"
     child.sendline('quit')
-    # print(child.before)
     child.close()
     return flag
+
+
+def auto_check2(lj_type, name):
+    import time
+    cmd = 'zj zjlj lj:type={},name={}'.format(lj_type, name)
+    print(cmd)
+    time.sleep(4)
+    return "success"
+    # print(flag)
+
+
+def down_report():
+    import datetime
+    import os
+    name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    src_path = "/home/omscc/zengke/output/*"
+    dst_path = "/home/omscc/webapp/backup" + os.sep + str(name)
+    os.mkdir(dst_path)
+    cp_cmd = "cp -R {} {}".format(src_path, dst_path)
+    os.system(cp_cmd)
+    os.environ['name'] = str(name)
+    tmd_cmd = "tar zcf ${name}.tar.gz * --remove-files;rm -rf host"
+    os.chdir(dst_path)
+    os.system(tmd_cmd)
+    return str(name)
+
+
+if __name__ == '__main__':
+    auto_check('zj','NEWSAP2')
