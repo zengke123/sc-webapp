@@ -110,13 +110,15 @@ def lj():
 # 自动例检主函数
 @app.route('/check/autocheck', methods=['GET', 'POST'])
 def autocheck_run():
-    import datetime
     hostname = request.form.get('hostname')
     type = request.form.get('type')
     seed = request.form.get("seed")
     status[seed] = 20
     # flag = "success"
-    flag = auto_check(type,hostname)
+    try:
+        flag = auto_check(type,hostname)
+    except:
+        flag = "fail"
     status[seed] =80
     report_name = down_report()
     # report_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")

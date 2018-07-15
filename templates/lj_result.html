@@ -35,7 +35,7 @@
             var hosttype = "{{ type }}";//获取例检主机名称
             $("#bar").attr("class", "progress-bar progress-bar-striped active");
             $("#bar").width(0);
-            $.ajaxSetup({ cache: false });
+            //$.ajaxSetup({ cache: false });
                 var sitv = setInterval(function () {
                     var urlStr = "/check/autocheck_status/" + Math.random();
                     $.ajax({
