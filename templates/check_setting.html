@@ -3,44 +3,47 @@
 {% block body %}
 <h3><strong>例检配置</strong></h3><br>
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-
+    <div class="panel">
+        <button class="btn btn-warning" type="button" id="DEL" onclick="del">删除</button>
+    </div>
 {% for data in datas %}
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingOne">
-      <h4 class="panel-title">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse{{ data[2] }}" aria-expanded="true" aria-controls="collapse{{ data[2] }}">
           {{ data[0] }}
         </a>
-      </h4>
+        </h4>
+        </div>
+        <div id="collapse{{ data[2] }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ data[2] }}">
+          <div class="panel-body">
+          <form method="POST">
+            <table class="table table-hover">
+                <tobody>
+                  <th>选择</th>
+                  <th>ID</th>
+                  <th>网元类型</th>
+                  <th>网元名称</th>
+                  <th>主机名称</th>
+                </tobody>
+                {% for host in data[1] %}
+                <tr>
+                <td><input type="checkbox" name="del_host" value="{{ host.id }}"></td>
+                <td>{{ host.id }}</td>
+                <td>{{ host.type }}</td>
+                <td>{{ host.cluster }}</td>
+                <td>{{ host.hostname }}</td>
+                </tr>
+                {% endfor %}
+            </table></form>
+          </div>
+        </div>
     </div>
-    <div id="collapse{{ data[2] }}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{ data[2] }}">
-      <div class="panel-body">
-      <form method="POST">
-		<table class="table table-hover">
-			<tobody>
-			  <th>选择</th>
-			  <th>网元类型</th>
-			  <th>网元名称</th>
-			  <th>主机名称</th>
-			  <th>操作</th>
-			</tobody>
-            {% for host in data[1] %}
-			<tr>
-			<td><input type="checkbox" name="del_host" value="{{ host.id }}"></td>
-            <td>{{ host.type }}</td>
-            <td>{{ host.cluster }}</td>
-            <td>{{ host.hostname }}</td>
-			<td><a class="btn btn-primary btn-xs" href="#" role="button">删除</a><a class="btn btn-default btn-xs" href="#" role="button">修改</a></td>
-			</tr>
-            {% endfor %}
-        </table></form>
-      </div>
-    </div>
-  </div>
 
 {% endfor %}
 
 </div>
+
 
 
 <div class="panel panel-default">
@@ -89,7 +92,30 @@
                     }
                     else alert("添加失败")
                 });
-        })
+        });
+
+        $("#DEL").click(function () {
+            var str=$("input[type='checkbox']:checked");
+            var objarray=str.length;
+            var ids = "";
+            for (i=0;i<objarray;i++) {
+                if(str[i].checked === true) {
+                    ids+=str[i].value+",";
+                }
+            }
+             $.post("{{ url_for('check_del') }}",
+                {
+                    del_id: ids
+                },
+                function (data) {
+                    if(data==="success"){
+                        alert("删除成功")
+                    }
+                    else alert("删除失败")
+                });
+            });
     });
+
+
 </script>
 {% endblock %}

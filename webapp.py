@@ -115,11 +115,11 @@ def autocheck_run():
     type = request.form.get('type')
     seed = request.form.get("seed")
     status[seed] = 20
-    flag = "success"
-    # flag = auto_check(type,hostname)
+    # flag = "success"
+    flag = auto_check(type,hostname)
     status[seed] =80
-    # report_name = down_report()
-    report_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    report_name = down_report()
+    # report_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     # 例检成功，添加到历史记录
     if flag == "success":
         new_type = "集群" if type == "jq" else "主机"
@@ -153,24 +153,20 @@ def download(file):
 @app.route('/check/setting')
 @login_required
 def check_setting():
-
-    # datas = db.session.query(Host).all()
+    # 匹配对应的css样式
     class_type = ['One','Two','Three','Four','Five','Six', 'Seven','Eight','Nine','Ten','Eleven','Twelve']
     datas = []
     cluste_type = db.session.query(distinct(Host.type)).all()
     types = [x[0] for x in cluste_type]
     for i, c_type in enumerate(types):
         cluste_temps = db.session.query(Host).filter(Host.type == c_type).all()
-        # print(cluste_temps)
-        # clusters = [x[0] for x in cluste_temps]
         datas.append((c_type, cluste_temps,class_type[i]))
     return render_template('check_setting.html',datas=datas)
-    # print(datas)
-    # return "测试"
+
 
 
 # 添加例检项
-@app.route('/check/setting/add/', methods=['GET', 'POST'])
+@app.route('/check/setting/add', methods=['GET', 'POST'])
 @login_required
 def check_add():
     type = request.form.get('type')
@@ -188,12 +184,20 @@ def check_add():
 
 
 # 删除例检项,暂未实现
-@app.route('/check/setting/del')
+@app.route('/check/setting/del', methods=['GET', 'POST'])
 @login_required
 def check_del():
-    print(request.args)
-    print(request.form.get('del_host'))
-    return render_template('check_del.html')
+    del_ids = request.form.get('del_id')
+    if not del_ids:
+        return "fail"
+    ids = del_ids.split(",")
+    for id in ids:
+        if id:
+            to_del_id = Host.query.filter(Host.id == id).first()
+            db.session.delete(to_del_id)
+        db.session.commit()
+    return "success"
+
 
 
 # 话单查询页面,暂未实现
@@ -208,7 +212,6 @@ def query():
 def history():
     # 获取get请求传过来的页数,没有传参数，默认为1
     page = int(request.args.get('page', 1))
-    # datas = db.session.query(History).all()
     paginate = History.query.order_by(History.id.asc()).paginate(page, per_page=10, error_out=False)
     datas =  paginate.items
     return render_template("history.html",paginate=paginate, datas=datas)
