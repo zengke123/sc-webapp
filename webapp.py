@@ -1,5 +1,5 @@
 from exts import create_app, db, down_report, auto_check
-from models import User, Host
+from models import User, Host, History
 from sqlalchemy import distinct
 from decorators import login_required
 from flask import request, session, jsonify
@@ -110,13 +110,22 @@ def lj():
 # 自动例检主函数
 @app.route('/check/autocheck', methods=['GET', 'POST'])
 def autocheck_run():
+    import datetime
     hostname = request.form.get('hostname')
     type = request.form.get('type')
     seed = request.form.get("seed")
     status[seed] = 20
-    flag = auto_check(type,hostname)
+    flag = "success"
+    # flag = auto_check(type,hostname)
     status[seed] =80
-    report_name = down_report()
+    # report_name = down_report()
+    report_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    # 例检成功，添加到历史记录
+    if flag == "success":
+        new_type = "集群" if type == "jq" else "主机"
+        add_log = History(checktime=report_name, hostname=hostname, type=new_type)
+        db.session.add(add_log)
+        db.session.commit()
     status[seed] = 100
     status.pop(seed)
     return jsonify({'flag':flag,'filename':report_name})
@@ -127,8 +136,8 @@ def autocheck_run():
 @app.route('/check/autocheck_status/<id>', methods=['GET', 'POST'])
 def autocheck_status(id):
     seed = request.form.get("seed")
-    print(seed)
-    print(status.get(seed))
+    # print(seed)
+    # print(status.get(seed))
     return str(status.get(seed))
 
 
@@ -150,7 +159,6 @@ def check_setting():
     datas = []
     cluste_type = db.session.query(distinct(Host.type)).all()
     types = [x[0] for x in cluste_type]
-    nums = len(types)
     for i, c_type in enumerate(types):
         cluste_temps = db.session.query(Host).filter(Host.type == c_type).all()
         # print(cluste_temps)
@@ -193,6 +201,17 @@ def check_del():
 @login_required
 def query():
     return render_template('query.html')
+
+
+@app.route('/history')
+@login_required
+def history():
+    # 获取get请求传过来的页数,没有传参数，默认为1
+    page = int(request.args.get('page', 1))
+    # datas = db.session.query(History).all()
+    paginate = History.query.order_by(History.id.asc()).paginate(page, per_page=10, error_out=False)
+    datas =  paginate.items
+    return render_template("history.html",paginate=paginate, datas=datas)
 
 
 # 上下文管理器，返回的结果会作为变量在所有模板中进行渲染

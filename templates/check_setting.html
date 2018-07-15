@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}自动例检配置{% endblock %}
+{% block title %}自动例检{% endblock %}
 {% block body %}
 <h3><strong>例检配置</strong></h3><br>
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
@@ -24,8 +24,8 @@
 			  <th>主机名称</th>
 			  <th>操作</th>
 			</tobody>
+            {% for host in data[1] %}
 			<tr>
-                {% for host in data[1] %}
 			<td><input type="checkbox" name="del_host" value="{{ host.id }}"></td>
             <td>{{ host.type }}</td>
             <td>{{ host.cluster }}</td>

@@ -15,3 +15,11 @@ class Host(db.Model):
     type = db.Column(db.String(32), index=True, nullable=False)
     cluster = db.Column(db.String(32), index=True, nullable=False)
     hostname = db.Column(db.String(32), unique=True, nullable=False)
+
+
+class History(db.Model):
+    __tablename__ = 'history'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    checktime = db.Column(db.String(64), nullable=False)
+    hostname = db.Column(db.String(32), nullable=False)
+    type = db.Column(db.String(32), nullable=False)

@@ -2,7 +2,7 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from webapp import app
 from exts import db
-from models import User, Host
+from models import User, Host, History
 
 # init 初始化，第一次使用
 # python manage.py db init

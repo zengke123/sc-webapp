@@ -1,7 +1,7 @@
 import os
 from datetime import timedelta
 # 调试模式
-DEBUG = False
+DEBUG = True
 # SECRET_KEY设置当CSRF启用时有效，这将生成一个加密的token供表单验证使用
 SECRET_KEY = os.urandom(24)
 # 设置session的超时时间
