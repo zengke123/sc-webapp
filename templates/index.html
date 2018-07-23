@@ -1,13 +1,355 @@
 {% extends 'base.html' %}
 {% block title %}主页{% endblock %}
-{% block body %}
-<div class="jumbotron">
-  <h1>Hello!</h1>
-  <p>测试页面.</p>
-  <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
+{% block head %}
+    <!-- 引入 ECharts 文件 -->
+     <script src="{{ url_for('static',filename='js/echarts.common.min.js') }}"></script>
+{% endblock %}
 
+{% block body %}
+
+<div class="row" style="background-color: #f5f5f5">
+<div class="col-md-8"><br>
+<div id="main" style="width: 750px;height:250px;">
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+    var option = {
+        backgroundColor: '#ffffff',
+        title: {
+            text: 'CAPS统计',
+            subtext: 'AS网元caps总和（小时峰值）'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        legend: {
+            data: ['SCPAS', 'CATAS']
+        },
+        xAxis: {
+            boundaryGap: false,
+            data: {{ date }}
+            //axisLabel: {
+            //    formatter: '第{value}次'
+            //}
+        },
+        yAxis: {
+            type: 'value'
+            //axisLabel: {
+            //    formatter: '{value} caps'
+            //}
+        },
+        series: [{
+            type: 'line',
+            name: 'SCPAS',
+            showAllSymbol: true,
+            smooth: true,
+            data: {{ scpas_caps }},
+            markLine: {
+                data: [{
+                    type: 'average',
+                    name: '平均值'
+                }]
+            }
+        }, {
+            type: 'line',
+            name: 'CATAS',
+            showAllSymbol: true,
+            smooth: true,
+            data: {{ catas_caps }},
+            markLine: {
+                data: [{
+                    type: 'average',
+                    name: '平均值'
+                }]
+            }
+        }]
+    };
+    myChart.setOption(option);
+</script>
+</div>
+</div>
+<div class="col-md-4"><br>
+<div id="user" style="height:250px;">
+      <h4><strong>容量统计</strong></h4>
+      <h5>Volte智能网用户数 <strong>{{ v_users }}</strong></h5>
+      <p class="text-left"><small>Total: {{ v_total }}</small></p>
+      <div class="progress">
+        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ v_per }};">
+            {{ v_per }}
+        </div>
+       </div>
+      <h5>Volte彩铃用户数 <strong>{{ c_users }}</strong></h5>
+      <p class="text-left"><small>Total: {{ c_total }}</small></p>
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ c_per }};">
+            {{ c_per }}
+          </div>
+      </div>
+  </div>
+</div>
+</div>
+<div class="row">
+  <div class="col-md-8">
+      <h4><strong>性能指标</strong></h4>
+ <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#cpu" aria-controls="cpu" role="tab" data-toggle="tab">CPU</a></li>
+    <li role="presentation"><a href="#mem" aria-controls="mem" role="tab" data-toggle="tab">MEM</a></li>
+    <li role="presentation"><a href="#io" aria-controls="io" role="tab" data-toggle="tab">IO</a></li>
+  </ul>
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="cpu" style="width: 750px;height:300px;">
+        <script type="text/javascript">
+            var myChart = echarts.init(document.getElementById('cpu'));
+            option = {
+                color: ['#3398DB', '#D53A35'],
+                title: {
+                    text: 'CPU最大利用率',
+                    textStyle: {
+                        //color: '#fff'
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        magicType: {
+                            show: true,
+                            type: ['line', 'bar']
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                legend: {
+                    data: ['{{ date2 }}', '{{ date1 }}']
+                },
+                xAxis: [{
+                    type: 'category',
+                    data: {{ cluster|tojson }},
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }],
+                yAxis: [{
+                        type: 'value',
+                        name: '(%)',
+                        min: 0,
+                        max: 100,
+                        interval: 20,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    }
+                ],
+                series: [{
+                        name: '{{ date2 }}',
+                        type: 'bar',
+                        data: {{ cpu_date2 }}
+                    },
+                    {
+                        name: '{{ date1 }}',
+                        type: 'bar',
+                        data: {{ cpu_date1 }}
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        </script>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="mem" style="width: 750px;height:300px;">
+         <script type="text/javascript">
+            var myChart = echarts.init(document.getElementById('mem'));
+            option = {
+                color: ['#3398DB', '#D53A35'],
+                title: {
+                    text: '内存最大占用率',
+                    textStyle: {
+                        //color: '#fff'
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        magicType: {
+                            show: true,
+                            type: ['line', 'bar']
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                legend: {
+                    data: ['{{ date2 }}', '{{ date1 }}']
+                },
+                xAxis: [{
+                    type: 'category',
+                    data: {{ cluster|tojson }},
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }],
+                yAxis: [{
+                        type: 'value',
+                        name: '(%)',
+                        min: 0,
+                        max: 100,
+                        interval: 20,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    }
+                ],
+                series: [{
+                        name: '{{ date2 }}',
+                        type: 'bar',
+                        data: {{ mem_date2 }}
+                    },
+                    {
+                        name: '{{ date1 }}',
+                        type: 'bar',
+                        data: {{ mem_date1 }}
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        </script>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="io" style="width: 750px;height:300px;">
+        <script type="text/javascript">
+            var myChart = echarts.init(document.getElementById('io'));
+            option = {
+                color: ['#3398DB', '#D53A35'],
+                title: {
+                    text: 'IO最大占用率',
+                    textStyle: {
+                        //color: '#fff'
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        crossStyle: {
+                            color: '#999'
+                        }
+                    }
+                },
+                toolbox: {
+                    feature: {
+                        dataView: {
+                            show: true,
+                            readOnly: false
+                        },
+                        magicType: {
+                            show: true,
+                            type: ['line', 'bar']
+                        },
+                        restore: {
+                            show: true
+                        },
+                        saveAsImage: {
+                            show: true
+                        }
+                    }
+                },
+                legend: {
+                    data: ['{{ date2 }}', '{{ date1 }}']
+                },
+                xAxis: [{
+                    type: 'category',
+                    data: {{ cluster|tojson }},
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }],
+                yAxis: [{
+                        type: 'value',
+                        name: '(%)',
+                        min: 0,
+                        max: 100,
+                        interval: 20,
+                        axisLabel: {
+                            formatter: '{value}'
+                        }
+                    }
+                ],
+                series: [{
+                        name: '{{ date2 }}',
+                        type: 'bar',
+                        data: {{ io_date2 }}
+                    },
+                    {
+                        name: '{{ date1 }}',
+                        type: 'bar',
+                        data: {{ io_date1 }}
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        </script>
+    </div>
+  </div>
 
 </div>
+
+  <div class="col-md-4">
+      <h4><strong>最近例检记录</strong></h4>
+      <table class="table table-striped">
+        {% for data in lj_datas %}
+        <tr>
+        <td>{{ data.type }}</td>
+        <td>{{ data.hostname }}</td>
+        <td>{{ data.checktime }}</td>
+        <td><a class="glyphicon glyphicon-download-alt" href="/download/{{ data.checktime }}" role="button"></a></td>
+        </tr>
+        {% endfor %}
+      </table>
+  </div>
+
+</div>
+
+
+
+
 
 
 {% endblock %}

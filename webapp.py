@@ -1,3 +1,4 @@
+import datetime
 from exts import create_app, db, down_report, auto_check
 from models import User, Host, History
 from sqlalchemy import distinct
@@ -39,8 +40,52 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html')
+    # 获取caps数据
+    datas = db.session.execute("select `date`,`scpas_caps`,`catas_caps` from caps",
+                               bind=db.get_engine(app, bind="tongji")).fetchall()
+    date = [int(x[0]) for x in datas]
+    scpas_caps = [x[1] for x in datas]
+    catas_caps = [x[2] for x in datas]
+    # 获取用户数据
+    user_datas = db.session.execute("select vpmn_volte,hjh_volte,pyq_volte,crbt_volte from users order by date desc",
+                                    bind=db.get_engine(app, bind="tongji")).fetchone()
+    v_users = int(user_datas[0]) + int(user_datas[1]) + int(user_datas[2])
+    v_total = 15000000
+    v_per = format(v_users/v_total, '.2%')
+    c_users = int(user_datas[3])
+    c_total = 8500000
+    c_per = format(c_users/c_total, '.2%')
+    # 获取cpu等性能数据
+    # date1 = "20180709"
+    # date2 = "20180708"
+    date1 = (datetime.datetime.today() - datetime.timedelta(1)).strftime("%Y%m%d")
+    date2 = (datetime.datetime.today() - datetime.timedelta(2)).strftime("%Y%m%d")
+    # 近两天CPU数据
+    cpu_temp = db.session.execute("select `cluste`,`max_cpu` from as_pfmc where date='20180709'",
+                                  bind=db.get_engine(app, bind="tongji")).fetchall()
+    cluster = [x[0] for x in cpu_temp]
+    cpu_date1 = [x[1] for x in cpu_temp]
+    cpu_temp2 = db.session.execute("select `max_cpu` from as_pfmc where date='20180708'",
+                                   bind=db.get_engine(app, bind="tongji")).fetchall()
+    cpu_date2 = [x[0] for x in cpu_temp2]
+    # 近两天内存数据
+    mem_temp1 = db.session.execute("select `max_mem` from as_pfmc where date='20180709'",
+                                  bind=db.get_engine(app, bind="tongji")).fetchall()
+    mem_date1 = [x[0] for x in mem_temp1]
+    mem_temp2 = db.session.execute("select `max_mem` from as_pfmc where date='20180708'",
+                                  bind=db.get_engine(app, bind="tongji")).fetchall()
+    mem_date2 = [x[0] for x in mem_temp2]
 
+    io_temp1 = db.session.execute("select `max_io` from as_pfmc where date='20180709'",
+                                  bind=db.get_engine(app, bind="tongji")).fetchall()
+    io_date1 = [x[0] for x in io_temp1]
+    io_temp2 = db.session.execute("select `max_io` from as_pfmc where date='20180708'",
+                                  bind=db.get_engine(app, bind="tongji")).fetchall()
+    io_date2 = [x[0] for x in io_temp2]
+    # 获取最近例检记录
+    paginate = History.query.order_by(History.id.desc()).paginate(1, per_page=8, error_out=False)
+    lj_datas = paginate.items
+    return render_template('index.html',**locals())
 
 # 修改密码页面
 @app.route('/user', methods=['GET', 'POST'])
@@ -79,7 +124,7 @@ def check():
         cluste_temps = db.session.query(distinct(Host.cluster)).filter(Host.type == c_type).all()
         clusters = [x[0] for x in cluste_temps]
         data.append((c_type, clusters))
-    return render_template('check.html',data=data)
+    return render_template('check.html', data=data)
 
 
 # 例检单台主机页面
@@ -111,35 +156,32 @@ def lj():
 @app.route('/check/autocheck', methods=['GET', 'POST'])
 def autocheck_run():
     hostname = request.form.get('hostname')
-    type = request.form.get('type')
+    host_type = request.form.get('type')
     seed = request.form.get("seed")
     status[seed] = 20
-    # flag = "success"
     try:
-        flag = auto_check(type,hostname)
+        flag = auto_check(host_type, hostname)
     except:
         flag = "fail"
-    status[seed] =80
-    report_name = down_report()
-    # report_name = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    status[seed] = 80
     # 例检成功，添加到历史记录
     if flag == "success":
-        new_type = "集群" if type == "jq" else "主机"
+        report_name = down_report()
+        new_type = "集群" if host_type == "jq" else "主机"
         add_log = History(checktime=report_name, hostname=hostname, type=new_type)
         db.session.add(add_log)
         db.session.commit()
+    else:
+        report_name = None
     status[seed] = 100
     status.pop(seed)
-    return jsonify({'flag':flag,'filename':report_name})
-
+    return jsonify({'flag': flag, 'filename': report_name})
 
 
 # 获取例检状态,实现前端进度条
 @app.route('/check/autocheck_status/<id>', methods=['GET', 'POST'])
 def autocheck_status(id):
     seed = request.form.get("seed")
-    # print(seed)
-    # print(status.get(seed))
     return str(status.get(seed))
 
 
@@ -156,27 +198,26 @@ def download(file):
 @login_required
 def check_setting():
     # 匹配对应的css样式
-    class_type = ['One','Two','Three','Four','Five','Six', 'Seven','Eight','Nine','Ten','Eleven','Twelve']
+    class_type = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve']
     datas = []
     cluste_type = db.session.query(distinct(Host.type)).all()
     types = [x[0] for x in cluste_type]
     for i, c_type in enumerate(types):
         cluste_temps = db.session.query(Host).filter(Host.type == c_type).all()
-        datas.append((c_type, cluste_temps,class_type[i]))
-    return render_template('check_setting.html',datas=datas)
-
+        datas.append((c_type, cluste_temps, class_type[i]))
+    return render_template('check_setting.html', datas=datas)
 
 
 # 添加例检项
 @app.route('/check/setting/add', methods=['GET', 'POST'])
 @login_required
 def check_add():
-    type = request.form.get('type')
+    host_type = request.form.get('type')
     cluster = request.form.get('cluster')
     hosts_temp = request.form.get('hostname')
     hosts = hosts_temp.split('|')
     for host in hosts:
-        add_host = Host(type=type, cluster=cluster, hostname=host)
+        add_host = Host(type=host_type, cluster=cluster, hostname=host)
         db.session.add(add_host)
     try:
         db.session.commit()
@@ -185,7 +226,7 @@ def check_add():
         return "fail"
 
 
-# 删除例检项,暂未实现
+# 删除例检项
 @app.route('/check/setting/del', methods=['GET', 'POST'])
 @login_required
 def check_del():
@@ -193,13 +234,12 @@ def check_del():
     if not del_ids:
         return "fail"
     ids = del_ids.split(",")
-    for id in ids:
-        if id:
-            to_del_id = Host.query.filter(Host.id == id).first()
+    for del_id in ids:
+        if del_id:
+            to_del_id = Host.query.filter(Host.id == del_id).first()
             db.session.delete(to_del_id)
         db.session.commit()
     return "success"
-
 
 
 # 话单查询页面,暂未实现
@@ -215,8 +255,8 @@ def history():
     # 获取get请求传过来的页数,没有传参数，默认为1
     page = int(request.args.get('page', 1))
     paginate = History.query.order_by(History.id.asc()).paginate(page, per_page=10, error_out=False)
-    datas =  paginate.items
-    return render_template("history.html",paginate=paginate, datas=datas)
+    datas = paginate.items
+    return render_template("history.html", paginate=paginate, datas=datas)
 
 
 # 上下文管理器，返回的结果会作为变量在所有模板中进行渲染

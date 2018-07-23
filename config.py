@@ -12,12 +12,17 @@ PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
 DIALECT = 'mysql'
 DRIVER ='mysqlconnector'
 USERNAME = 'root'
-PASSWORD = 'zengke'
+PASSWORD = '123456'
 HOST = '127.0.0.1'
 PORT = '3306'
 DATABASE = 'webapp'
+DATABASE2 = 'tongji'
 SQLALCHEMY_DATABASE_URI = "{}+{}://{}:{}@{}:{}/{}?charset=utf8".format(DIALECT,DRIVER,USERNAME,PASSWORD,
                                                                        HOST,PORT,DATABASE)
+SQLALCHEMY_BINDS ={
+    'tongji':"{}+{}://{}:{}@{}:{}/{}?charset=utf8".format(DIALECT,DRIVER,USERNAME,PASSWORD,
+                                                                       HOST,PORT,DATABASE2)
+}
 
 
 

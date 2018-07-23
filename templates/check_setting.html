@@ -3,9 +3,6 @@
 {% block body %}
 <h3><strong>例检配置</strong></h3><br>
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-    <div class="panel">
-        <button class="btn btn-warning" type="button" id="DEL" onclick="del">删除</button>
-    </div>
 {% for data in datas %}
     <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
@@ -41,7 +38,9 @@
     </div>
 
 {% endfor %}
-
+    <div class="panel">
+        <button class="btn btn-default btn-sm" type="button" id="DEL" onclick="del">删除</button>
+    </div>
 </div>
 
 
