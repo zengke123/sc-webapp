@@ -17,7 +17,7 @@
           <form method="POST">
             <table class="table table-hover">
                 <tobody>
-                  <th>选择</th>
+                  <th><input type="checkbox" value="全选" name="selectall_{{ data[2] }}"/>全选</th>
                   <th>ID</th>
                   <th>网元类型</th>
                   <th>网元名称</th>
@@ -25,7 +25,7 @@
                 </tobody>
                 {% for host in data[1] %}
                 <tr>
-                <td><input type="checkbox" name="del_host" value="{{ host.id }}"></td>
+                <td><input type="checkbox" name="del_host_{{ data[2] }}" value="{{ host.id }}"></td>
                 <td>{{ host.id }}</td>
                 <td>{{ host.type }}</td>
                 <td>{{ host.cluster }}</td>
@@ -33,17 +33,28 @@
                 </tr>
                 {% endfor %}
             </table></form>
+                <script type="text/javascript">
+                $('input[name="selectall_{{ data[2] }}"]').click(function(){
+                    if($(this).is(':checked')){
+                        $('input[name="del_host_{{ data[2] }}"]').each(function(){
+                            $(this).prop("checked",true);
+                        });
+                    }else{
+                        $('input[name="del_host_{{ data[2] }}"]').each(function(){
+                            $(this).prop("checked",false);
+                        });
+                    }
+                });
+                </script>
           </div>
         </div>
     </div>
 
 {% endfor %}
-    <div class="panel">
-        <button class="btn btn-default btn-sm" type="button" id="DEL" onclick="del">删除</button>
-    </div>
+<div class="panel">
+<button class="btn btn-default" type="button" id="DEL" onclick="del">删除</button>
 </div>
-
-
+</div>
 
 <div class="panel panel-default">
   <!-- Default panel contents -->
@@ -76,9 +87,9 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $("#ADD").click(function () {
-            var input_type = document.getElementById("type").value
-            var input_cluster = document.getElementById("cluster").value
-            var input_hostname = document.getElementById("hostname").value
+            var input_type = document.getElementById("type").value;
+            var input_cluster = document.getElementById("cluster").value;
+            var input_hostname = document.getElementById("hostname").value;
             $.post("{{ url_for('check_add') }}",
                 {
                     type: input_type,
@@ -87,7 +98,8 @@
                 },
                 function (data) {
                     if(data==="success"){
-                        alert("添加成功")
+                        alert("添加成功");
+                        location.reload();
                     }
                     else alert("添加失败")
                 });
@@ -108,7 +120,8 @@
                 },
                 function (data) {
                     if(data==="success"){
-                        alert("删除成功")
+                        alert("删除成功");
+                        location.reload();
                     }
                     else alert("删除失败")
                 });

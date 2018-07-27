@@ -56,30 +56,30 @@ def index():
     c_total = 8500000
     c_per = format(c_users/c_total, '.2%')
     # 获取cpu等性能数据
-    # date1 = "20180709"
-    # date2 = "20180708"
+    # date1="20180709"
+    # date2="20180708"
     date1 = (datetime.datetime.today() - datetime.timedelta(1)).strftime("%Y%m%d")
     date2 = (datetime.datetime.today() - datetime.timedelta(2)).strftime("%Y%m%d")
     # 近两天CPU数据
-    cpu_temp = db.session.execute("select `cluste`,`max_cpu` from as_pfmc where date='20180709'",
+    cpu_temp = db.session.execute("select `cluste`,`max_cpu` from as_pfmc where date={}".format(date1),
                                   bind=db.get_engine(app, bind="tongji")).fetchall()
     cluster = [x[0] for x in cpu_temp]
     cpu_date1 = [x[1] for x in cpu_temp]
-    cpu_temp2 = db.session.execute("select `max_cpu` from as_pfmc where date='20180708'",
+    cpu_temp2 = db.session.execute("select `max_cpu` from as_pfmc where date={}".format(date2),
                                    bind=db.get_engine(app, bind="tongji")).fetchall()
     cpu_date2 = [x[0] for x in cpu_temp2]
     # 近两天内存数据
-    mem_temp1 = db.session.execute("select `max_mem` from as_pfmc where date='20180709'",
+    mem_temp1 = db.session.execute("select `max_mem` from as_pfmc where date={}".format(date1),
                                   bind=db.get_engine(app, bind="tongji")).fetchall()
     mem_date1 = [x[0] for x in mem_temp1]
-    mem_temp2 = db.session.execute("select `max_mem` from as_pfmc where date='20180708'",
+    mem_temp2 = db.session.execute("select `max_mem` from as_pfmc where date={}".format(date2),
                                   bind=db.get_engine(app, bind="tongji")).fetchall()
     mem_date2 = [x[0] for x in mem_temp2]
 
-    io_temp1 = db.session.execute("select `max_io` from as_pfmc where date='20180709'",
+    io_temp1 = db.session.execute("select `max_io` from as_pfmc where date={}".format(date1),
                                   bind=db.get_engine(app, bind="tongji")).fetchall()
     io_date1 = [x[0] for x in io_temp1]
-    io_temp2 = db.session.execute("select `max_io` from as_pfmc where date='20180708'",
+    io_temp2 = db.session.execute("select `max_io` from as_pfmc where date={}".format(date2),
                                   bind=db.get_engine(app, bind="tongji")).fetchall()
     io_date2 = [x[0] for x in io_temp2]
     # 获取最近例检记录
@@ -172,7 +172,7 @@ def autocheck_run():
         db.session.add(add_log)
         db.session.commit()
     else:
-        report_name = None
+        report_name = "null"
     status[seed] = 100
     status.pop(seed)
     return jsonify({'flag': flag, 'filename': report_name})
@@ -235,7 +235,8 @@ def check_del():
         return "fail"
     ids = del_ids.split(",")
     for del_id in ids:
-        if del_id:
+        # 判定是否为空或者非数字
+        if del_id and del_id.isdigit():
             to_del_id = Host.query.filter(Host.id == del_id).first()
             db.session.delete(to_del_id)
         db.session.commit()
@@ -271,4 +272,4 @@ def my_context_processor():
 
 if __name__ == '__main__':
     # 开启flask的多线程
-    app.run(host='0.0.0.0', threaded=True)
+    app.run(host='0.0.0.0',threaded=True)

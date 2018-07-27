@@ -3,9 +3,10 @@
 <link rel="stylesheet" href="/static/css/host.css">
 {% block body %}
 
-  <h3>自动例检</h3><br>
-  <div class="container">
-  <h4>{{ name }}</h4><br>
+    <div class="row">
+      <h3>例检{{ name }}</h3>
+        <hr />
+    </div>
     <div class="row">
         <div class="col-md-12">
             <div class="icon_content_area">
@@ -26,5 +27,9 @@
         </div>
     </div>
     <br>
+    <div class="row">
+    <button type="button" class="btn btn-default call_back_class" onclick="javascript:history.back(-1);">返回</button>
+    </div>
+
 
 {% endblock %}
