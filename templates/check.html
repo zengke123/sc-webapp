@@ -2,7 +2,14 @@
 {% block title %}自动例检{% endblock %}
 <link rel="stylesheet" href="/static/css/host.css">
 {% block body %}
-
+<style type="text/css">
+    h4 {
+    font-size: 18px;
+    line-height: 1.2;
+    padding: 2px 0 2px 10px;
+    border-left: 4px solid #09C878;
+}
+</style>
   <h3><strong>自动例检</strong></h3>
   <div class="container">
     {% for host in data %}
