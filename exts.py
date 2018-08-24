@@ -1,14 +1,5 @@
-import config
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
-
-def create_app():
-    app = Flask(__name__)
-    app.config.from_object(config)
-    db.init_app(app)
-    return app
+from web_init import db
+from models import History, Host, Jobs
 
 
 def auto_check(lj_type, name):
@@ -59,5 +50,85 @@ def down_report():
     return str(name)
 
 
+def add_check_log(host_type, hostname):
+    report_name = down_report()
+    new_type = "集群" if host_type == "jq" else "主机"
+    add_log = History(checktime=report_name, hostname=hostname, type=new_type)
+    db.session.add(add_log)
+    db.session.commit()
+
+
+def schedule_check(items, hosts, clusters):
+    # Todo 待完善
+    import time
+    from collections import namedtuple
+    CheckItem = namedtuple("CheckItem","type name")
+    temp_items = items.split(",")
+    check_items =[]
+    for item in temp_items:
+        if item in hosts:
+            check_items.append(CheckItem(type="zj",name=item))
+        elif item in clusters:
+            check_items.append(CheckItem(type="jq", name=item))
+    for item in check_items:
+        flag = auto_check(item.type, item.name)
+        if flag == "success":
+            add_check_log(item.type, item.name)
+            # 入库
+        else:
+            print("例检失败: ", item.name)
+        time.sleep(30)
+
+
+def test_check(items, hosts, clusters):
+    import time, datetime
+    from collections import namedtuple
+    CheckItem = namedtuple("CheckItem","type name")
+    temp_items = items.split(",")
+    check_items =[]
+    for item in temp_items:
+        if item in hosts:
+            check_items.append(CheckItem(type="zj",name=item))
+        elif item in clusters:
+            check_items.append(CheckItem(type="jq", name=item))
+        else:
+            print("数据异常")
+            # 抛出异常 raise
+    for item in check_items:
+        print(datetime.datetime.now(), "例检 {} {}".format(item.type,item.name))
+        time.sleep(5)
+        print(datetime.datetime.now(), "例检完成")
+        time.sleep(5)
+    return "success"
+
+def add_job_scheduler(handler, job_id, job_cron, args):
+    minute, hour, day, month, day_of_week = job_cron.split(",")
+    if day_of_week != "*":
+        day_of_week = str(int(day_of_week) - 1)
+    _job_args = {
+        'func': test_check,
+        'id': str(job_id),
+        'args': args,
+        'trigger': {
+            'type': 'cron',
+            'day_of_week': day_of_week,
+            'month': month,
+            'day': day,
+            'hour': hour,
+            'minute': minute
+        }
+    }
+    print(_job_args)
+    handler.add_job(**_job_args)
+
+
+def test_job(job_id):
+    import datetime
+    print(datetime.datetime.now() ," Job is Running: ", job_id)
+
+
 if __name__ == '__main__':
-    auto_check('zj','NEWSAP2')
+    # auto_check('zj','NEWSAP2')
+    tt = [('AS351',), ('AS381',), ('CAS041',), ('CAS042',), ('CAS051',), ('SAS031',), ('SAS032',), ('SAS033',), ('SAS034',), ('SAS041',), ('SAS051',), ('SAS061',), ('SAS062',), ('SCA042',), ('SDB031',), ('SDB032',), ('SDIA031',), ('SDIA032',), ('SSIP031',), ('SSIP032',), ('SSIP033',), ('SSIP034',)]
+    if 'AS351' in [x[0] for x in tt]:
+        print("hehe")

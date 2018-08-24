@@ -1,11 +1,23 @@
 import datetime
-from exts import create_app, db, down_report, auto_check
-from models import User, Host, History
+from web_init import create_app, db, scheduler
+from exts import down_report, auto_check, add_job_scheduler
+from models import User, Host, History, Jobs
 from sqlalchemy import distinct
 from decorators import login_required
 from flask import request, session, jsonify
 from flask import render_template, redirect, url_for, send_from_directory
+
 app = create_app()
+app.app_context().push()
+init_jobs = db.session.query(Jobs).filter(Jobs.status == 1).all()
+hosts_data = db.session.query(Host.hostname).all()
+hosts = [x[0] for x in hosts_data]
+clusters_data = db.session.query(distinct(Host.cluster)).all()
+clusters = [x[0] for x in clusters_data]
+for job in init_jobs:
+    args = (job.content, hosts, clusters)
+    add_job_scheduler(scheduler, job_id=job.id, job_cron=job.cron_time, args=args)
+scheduler.start()
 status = {}
 # 默认的视图函数，只能采用get请求，需要使用post，需要说明
 @app.route('/login', methods=['GET', 'POST'])
@@ -215,9 +227,9 @@ def check_add():
     host_type = request.form.get('type')
     cluster = request.form.get('cluster')
     hosts_temp = request.form.get('hostname')
-    hosts = hosts_temp.split('|')
-    for host in hosts:
-        add_host = Host(type=host_type, cluster=cluster, hostname=host)
+    add_hosts = hosts_temp.split('|')
+    for hostname in add_hosts:
+        add_host = Host(type=host_type, cluster=cluster, hostname=hostname)
         db.session.add(add_host)
     try:
         db.session.commit()
@@ -258,6 +270,100 @@ def history():
     paginate = History.query.order_by(History.id.asc()).paginate(page, per_page=10, error_out=False)
     datas = paginate.items
     return render_template("history.html", paginate=paginate, datas=datas)
+
+
+@app.route('/jobs')
+@login_required
+def jobs():
+    all_jobs = db.session.query(Jobs).all()
+    run_jobs = Jobs.query.filter(Jobs.status == 1).all()
+    return render_template("jobs.html", run_jobs=run_jobs, all_jobs=all_jobs)
+
+
+@app.route('/jobs/add', methods=['GET', 'POST'])
+@login_required
+def add_job():
+    name = request.form.get('name')
+    content = request.form.get('content')
+    cron_time = request.form.get('cron_time')
+    # print(name,content,cron_time)
+    host = content.split(",")
+    _hosts_data = db.session.query(Host.hostname).all()
+    _hosts = [x[0] for x in _hosts_data]
+    _clusters_data = db.session.query(distinct(Host.cluster)).all()
+    _clusters = [x[0] for x in _clusters_data]
+    for x in host:
+        if x not in (_hosts + _clusters):
+            return jsonify({'result': 'fail', 'error': x + "不存在"})
+    need_add_job = Jobs(name=name, content=content, cron_time=cron_time)
+    if cron_time.count(",") != 4:
+        return jsonify({'result': 'fail', 'error': "执行时间Cron格式错误"})
+    db.session.add(need_add_job)
+    try:
+        db.session.commit()
+        return jsonify({'result': 'success', 'error': None})
+    except:
+        return jsonify({'result': 'fail', 'error': '数据库错误'})
+
+
+@app.route('/jobs/pause', methods=['GET', 'POST'])
+@login_required
+def pause_job():
+    job_id = request.form.get('job_id')
+    current_job = Jobs.query.filter(Jobs.id == int(job_id)).first()
+    if current_job.status == 1:
+        scheduler.pause_job(id=job_id)
+        current_job.status = 0
+        db.session.commit()
+        print("任务【{}】【{}】已从scheduler队列暂停".format(current_job.id, current_job.name))
+        return "success"
+    else:
+        return "fail"
+
+
+@app.route('/jobs/active', methods=['GET', 'POST'])
+@login_required
+def active_job():
+    # 未初始化的任务需要先进行添加
+    job_id = request.form.get('job_id')
+    current_job = Jobs.query.filter(Jobs.id == int(job_id)).first()
+    if current_job:
+        try:
+            scheduler.resume_job(id=job_id)
+            current_job.status = 1
+            db.session.commit()
+        except:
+            _hosts_data = db.session.query(Host.hostname).all()
+            _hosts = [x[0] for x in _hosts_data]
+            _clusters_data = db.session.query(distinct(Host.cluster)).all()
+            _clusters = [x[0] for x in _clusters_data]
+            _args = (current_job.content, _hosts, _clusters)
+            add_job_scheduler(scheduler, job_id=current_job.id, job_cron=current_job.cron_time, args=_args)
+            current_job.status = 1
+            db.session.commit()
+        print("任务【{}】【{}】已从scheduler队列激活".format(current_job.id, current_job.name))
+        return "success"
+    else:
+        return "fail"
+
+
+@app.route('/jobs/remove', methods=['GET', 'POST'])
+@login_required
+def remove_job():
+    # 任务删除,正在运行或已暂停的任务，需要从任务队列中清除
+    job_id = request.form.get('job_id')
+    current_job = Jobs.query.filter(Jobs.id == int(job_id)).first()
+    try:
+        scheduler.delete_job(id=job_id)
+        print("任务【{}】【{}】已从scheduler队列删除".format(current_job.id, current_job.name))
+    except:
+        print("任务【{}】【{}】未在scheduler队列初始化,已删除".format(current_job.id, current_job.name))
+    try:
+        db.session.delete(current_job)
+        db.session.commit()
+        return "success"
+    except:
+        return "fail"
 
 
 # 上下文管理器，返回的结果会作为变量在所有模板中进行渲染
