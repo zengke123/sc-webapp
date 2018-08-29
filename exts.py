@@ -59,7 +59,6 @@ def add_check_log(host_type, hostname):
 
 
 def schedule_check(items, hosts, clusters):
-    # Todo 待完善
     import time
     from collections import namedtuple
     CheckItem = namedtuple("CheckItem","type name")
@@ -73,10 +72,11 @@ def schedule_check(items, hosts, clusters):
     for item in check_items:
         flag = auto_check(item.type, item.name)
         if flag == "success":
-            add_check_log(item.type, item.name)
+            #add_check_log(item.type, item.name)
             # 入库
+            print("scheduler任务例检【{}】【{}】成功".format(item.type, item.name))
         else:
-            print("例检失败: ", item.name)
+            print("scheduler任务例检【{}】【{}】失败".format(item.type, item.name))
         time.sleep(30)
 
 
@@ -106,7 +106,7 @@ def add_job_scheduler(handler, job_id, job_cron, args):
     if day_of_week != "*":
         day_of_week = str(int(day_of_week) - 1)
     _job_args = {
-        'func': test_check,
+        'func': schedule_check,
         'id': str(job_id),
         'args': args,
         'trigger': {
@@ -128,7 +128,4 @@ def test_job(job_id):
 
 
 if __name__ == '__main__':
-    # auto_check('zj','NEWSAP2')
-    tt = [('AS351',), ('AS381',), ('CAS041',), ('CAS042',), ('CAS051',), ('SAS031',), ('SAS032',), ('SAS033',), ('SAS034',), ('SAS041',), ('SAS051',), ('SAS061',), ('SAS062',), ('SCA042',), ('SDB031',), ('SDB032',), ('SDIA031',), ('SDIA032',), ('SSIP031',), ('SSIP032',), ('SSIP033',), ('SSIP034',)]
-    if 'AS351' in [x[0] for x in tt]:
-        print("hehe")
+    auto_check('zj','NEWSAP2')

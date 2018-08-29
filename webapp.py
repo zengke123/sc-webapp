@@ -6,17 +6,19 @@ from sqlalchemy import distinct
 from decorators import login_required
 from flask import request, session, jsonify
 from flask import render_template, redirect, url_for, send_from_directory
-
+# 初始化
 app = create_app()
-app.app_context().push()
-init_jobs = db.session.query(Jobs).filter(Jobs.status == 1).all()
-hosts_data = db.session.query(Host.hostname).all()
-hosts = [x[0] for x in hosts_data]
-clusters_data = db.session.query(distinct(Host.cluster)).all()
-clusters = [x[0] for x in clusters_data]
-for job in init_jobs:
-    args = (job.content, hosts, clusters)
-    add_job_scheduler(scheduler, job_id=job.id, job_cron=job.cron_time, args=args)
+# app.app_context().push()
+# 添加初始化任务
+with app.app_context():
+    init_jobs = db.session.query(Jobs).filter(Jobs.status == 1).all()
+    hosts_data = db.session.query(Host.hostname).all()
+    hosts = [x[0] for x in hosts_data]
+    clusters_data = db.session.query(distinct(Host.cluster)).all()
+    clusters = [x[0] for x in clusters_data]
+    for job in init_jobs:
+        args = (job.content, hosts, clusters)
+        add_job_scheduler(scheduler, job_id=job.id, job_cron=job.cron_time, args=args)
 scheduler.start()
 status = {}
 # 默认的视图函数，只能采用get请求，需要使用post，需要说明
