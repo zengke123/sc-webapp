@@ -55,7 +55,7 @@ def logout():
 @login_required
 def index():
     # 获取caps数据
-    datas = db.session.execute("select `date`,`scpas_caps`,`catas_caps` from caps",
+    datas = db.session.execute("select `date`,`scpas_caps`,`catas_caps` from caps where date_sub(curdate(), INTERVAL 30 DAY) <= date(`date`);",
                                bind=db.get_engine(app, bind="tongji")).fetchall()
     date = [int(x[0]) for x in datas]
     scpas_caps = [x[1] for x in datas]
