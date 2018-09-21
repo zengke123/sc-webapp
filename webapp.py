@@ -135,7 +135,7 @@ def check():
     types = [x[0] for x in cluste_type]
     for c_type in types:
         # cluste_temps = Host.query.filter(Host.type == type).distinct().all()
-        cluste_temps = db.session.query(distinct(Host.cluster)).filter(Host.type == c_type).all()
+        cluste_temps = db.session.query(distinct(Host.cluster)).filter(Host.type == c_type).order_by(Host.cluster).all()
         clusters = [x[0] for x in cluste_temps]
         data.append((c_type, clusters))
     return render_template('check.html', data=data)

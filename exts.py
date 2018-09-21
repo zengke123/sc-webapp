@@ -104,11 +104,12 @@ def test_check(items, hosts, clusters):
 def add_job_scheduler(handler, job_id, job_cron, args):
     minute, hour, day, month, day_of_week = job_cron.split(",")
     if day_of_week != "*":
-        day_of_week = str(int(day_of_week) - 1)
+        day_of_week = int(day_of_week) - 1
     _job_args = {
         'func': schedule_check,
         'id': str(job_id),
         'args': args,
+        'misfire_grace_time':300,
         'trigger': {
             'type': 'cron',
             'day_of_week': day_of_week,
@@ -118,6 +119,7 @@ def add_job_scheduler(handler, job_id, job_cron, args):
             'minute': minute
         }
     }
+    # misfire_grace_time:因为某种特定的原因导致定时任务服务挂掉，在重启后如果任务的时间和实际的时间的差值小于定义的misfire_grace_time
     print(_job_args)
     handler.add_job(**_job_args)
 
